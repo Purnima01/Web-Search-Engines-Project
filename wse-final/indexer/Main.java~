@@ -1,0 +1,73 @@
+package indexer;
+
+import java.util.*;
+
+public class Main {
+    /**
+     * Map each doc to its component/cluster id, obtained using UF.find(int docId)
+     * Note: the call, unionFindAlgo.find(docId), also handles individual pages that are not duplicates
+     * or do not have any duplicates, by putting those pages in a cluster of just one document - that
+     * page itself. So, suppose docId 1 is a doc with name ("abc") and without any duplicates,
+     * componentIdToDocs will store a Map.Entry of (1, [abc]) for this doc.
+     *
+     * So when componentIdToDocs is passed to findMaxPageRankForComponents(..),
+     * the PR of cluster#1 will be that of doc "abc". So regardless of whether duplicates exist or not,
+     * every page is in a cluster/component. The size of the component can range from 1 to N (where N =
+     * max number of docs in folder), in the case that N-1 docs are duplicates of the remaining doc.
+     */
+
+    private Map<Integer, List<String>> mapDocsToComponentIds() {
+        //initialize in constructor
+        Map<Integer, List<String>> componentIdToDocs = new HashMap<Integer, List<String>>();
+
+        Set<Integer> docIds = idToDocName_.keySet();
+
+        for (Integer docId : docIds) {
+            String docName = docNameToId_.get(docId);
+            Integer componentId = unionFindAlgo.find(docId);
+
+            List<String> docsInComponent;
+            if (!componentIdToDocs.containsKey(componentId)) {
+                docsInComponent = new ArrayList<String>();
+            } else {
+                docsInComponent = componentIdToDocs.get(componentId);
+            }
+            docsInComponent.add(docName);
+            componentIdToDocs.put(componentId, docsInComponent);
+        }
+        return componentIdToDocs;
+    }
+
+    /**
+     * Returns a mapping of the component/cluster id and
+     * the most authoritative doc for that component
+     */
+
+
+    //pass your this.pageRanks_ as 1st param
+    public Map<Integer, DocInfo> findMaxPageRankForComponents(
+							      Map<String, Double> pageRanks_, Map<Integer, List<String>> componentIdToDocs) {
+
+        Map<Integer, DocInfo> componentToAuthoritativeDocMap = new HashMap<Integer, DocInfo>();
+
+        for (Integer componentId : componentIdToDocs.keySet()) {
+            List<String> docsInComponent = componentIdToDocs.get(componentId);
+            double maxPageRankSoFarInComponent = Double.MIN_VALUE;
+            String docWithMaxPageRankInComponent = null;
+
+            for (String doc : docsInComponent) {
+                double pageRankForDoc = pageRanks_.get(doc);
+                if (pageRankForDoc > maxPageRankSoFarInComponent) {
+                    maxPageRankSoFarInComponent = pageRankForDoc;
+                    docWithMaxPageRankInComponent = doc;
+                }
+            }
+            DocInfo authoritativeDocForComponent =
+                new DocInfo(docWithMaxPageRankInComponent, maxPageRankSoFarInComponent);
+            componentToAuthoritativeDocMap.put(componentId, authoritativeDocForComponent);
+        }
+
+        return componentToAuthoritativeDocMap;
+    }
+
+}

@@ -1,0 +1,32 @@
+package final;
+
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.CommandLineParser;
+import org.apache.commons.cli.DefaultParser;
+import org.apache.commons.cli.OptionBuilder;
+import org.apache.commons.cli.Options;
+import org.apache.commons.cli.ParseException;
+
+public class DuplicateGenerator {
+    String inputDir_;
+    String outputDir_;
+
+    public DuplicateGenerator(String inputDir, String outputDir) {
+	inputDir_ = inputDir;
+	outputDir_ = outputDir;
+    }
+
+    public static void(String[] args) {
+	Options options = new Options();
+        options.addOption(OptionBuilder.withLongOpt("input")
+                          .withDescription("Path to the directory containing the input data")
+                          .hasArg()
+                          .isRequired()
+                          .create('i'));
+	options.addOption(OptionBuilder.withLongOpt("output")
+                          .withDescription("Path to the directory containing the output data")
+                          .hasArg()
+                          .isRequired()
+                          .create('o'));
+    }
+}
